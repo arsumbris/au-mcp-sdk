@@ -1,0 +1,32 @@
+{
+  "name": "@arsumbris/au-mcp-sdk",
+  "packageManager": "pnpm@11.1.1",
+  "engines": { "node": ">=23" },
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated": "./src/generated.ts",
+    "./wire": "./src/wire.ts",
+    "./plugin": "./src/plugin.ts",
+    "./adapter": "./src/adapter.ts",
+    "./trace": "./src/trace.ts",
+    "./client": "./src/client.ts",
+    "./types": "./src/types.ts",
+    "./vocabulary": "./src/vocabulary.ts",
+    "./frame": "./src/frame.ts",
+    "./socket": "./src/socket.ts",
+    "./launch-env": "./src/launch-env.ts",
+    "./launch-defaults": "./src/launch-defaults.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  }
+}

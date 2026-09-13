@@ -1,0 +1,27 @@
+# tool-access-meta — the typed meta a tool carries to DECLARE the engine access it needs
+# ([[spec - tool visibility - a per-launch allowlist decides which tools a session advertises::au-harness]]).
+# Claimed in an `mcp.tool` subtype's `meta:` block (never instance fields — meta is type-level,
+# read off the def via the engine). SEPARATE from plugin-runtime-meta (runtime wiring) and
+# tool-presentation-meta (the agent-facing surface): access is its own concern on its own
+# change-clock.
+#
+# This is the TOOL stating its own least privilege, fixed at discovery for its lifetime in the
+# daemon. It is TRANSPARENCY + a DEFAULT SCOPE, not a security boundary. There is no human knob
+# over it: which tools a session HAS is the separate on/off allowlist axis (the `AU_TOOLS`
+# per-launch env), and that axis never changes what a tool may do once it is loaded.
+#
+# A tool needing more than one access shape is expressed as DISTINCT tools, not as one tool with
+# a variable grant — a tool that is present but internally denied advertises work it cannot perform.
+#
+# v1 models broker access only; the record is shaped so `fs` / `net` / `reads` slot in additively
+# (no redesign). Owned here (au-mcp-sdk, the contract owner). Meta is excluded from the canonical
+# hash, so a vendored copy drops the doc; discovery reads the OWNER copy.
+#
+# Mixes in the schema-18 nominal-meta marker so it is meta-legal (closure includes
+# `au.engine.meta::au-engine`).
+extends: au.engine.meta::au-engine
+fields:
+  #: declared engine-broker access. `none` (or the meta absent) — no broker. `read` — a
+  #: read-only broker (engine reads, mutate denied). `read-write` — the full broker (reads +
+  #: the governed mutation channel). Default none.
+  broker?: [none, read, read-write]

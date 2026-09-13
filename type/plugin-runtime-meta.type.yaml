@@ -1,0 +1,58 @@
+# plugin-runtime-meta — the typed meta record a tool/plugin carries to declare its
+# loadable code + orchestration data (decision 2606191044). Claimed in an `mcp.tool`
+# subtype's `meta:` block, NEVER as instance fields — meta is type-level and read off
+# the type-def via the engine (type owner -> meta.entry), the way au-host's
+# `projection-runtime-meta` is. Owned here (au-mcp-sdk, the contract owner).
+#
+# `entry` is relative to the OWNING PACKAGE ROOT (where the type-def lives). The field
+# set is au-host's `entry`+`contractVersion` plus the multi-shape orchestration fields
+# our runtime PluginManifest already carries (shapes/deps/priority/description), so the
+# generated manifest is the type-def + meta and the loaded module adds only shape fns.
+# Meta is excluded from the canonical hash, so a vendored copy drops it and discovery
+# reads the OWNER copy (engine `subtypes` dedupes to it). See
+# [[observation - 2606231225 - au-host proved the meta-plus-owner mechanic and the engine ships a subtypes read::au-harness]].
+#
+# Mixes in the schema-18 nominal-meta marker so it is meta-legal (closure includes
+# `au.engine.meta::au-engine`).
+extends: au.engine.meta::au-engine
+fields:
+  # ESM entry implementing the tool's shape functions, relative to the package root.
+  entry: String
+  # Exact-equality contract handshake (no semver), mirrors PluginManifest.contractVersion.
+  contractVersion: Number{>=0 & integer}
+  # HOOK shapes: which kernel phases a `mcp.hook` fills (P2), a subset of
+  # `[observer, mediator, stamper, session-start]` (mediator+stamper genuinely co-occur; a
+  # session-start hook that also blocks tools co-declares `mediator`). OPTIONAL and
+  # HOOK-ONLY (split decision 2608242056): a `mcp.tool` is the agent-facing CALLABLE and
+  # declares NO shape (`callable` is not a shape, it IS `mcp.tool`); only a `mcp.hook`
+  # subtype declares `shapes`. Tracks the runtime `PluginShape` union (au-mcp-sdk
+  # `plugin.ts`), which dropped `callable` in the split — `stamper` (the write-stamp seam)
+  # is one such shape, registered by the daemon registry, so a stamper def like
+  # au-provenance's `au_prov_stamper` can declare it. `session-start` (decision 2609020302)
+  # runs once at session-open and returns computed inject.
+  # Quoted so YAML hands the shape over as a scalar string (a bare `[...]` parses as a
+  # YAML flow sequence and the trailing `[+]` then fails); the engine grammar parses it.
+  shapes?: "[observer, mediator, stamper, session-start][+]"
+  # Other plugins this one needs (P4); the daemon auto-loads them. PluginManifest.dependsOn.
+  deps?: String[]
+  # Ordering TIER within a phase (`gate | floor | policy`, earlier runs first), replacing the
+  # old integer `priority` (decision 2609020302 — role-named buckets, no magic numbers). The
+  # order follows from the role: gate (access/visibility/redirect) decides before floor
+  # (always-on safety) before policy (capability/user rules). Absent defaults to `policy`.
+  # PluginManifest.tier. Within a tier the daemon registry orders by name.
+  tier?: [gate, floor, policy]
+  # Fail-closed flag: a critical plugin that fails to load aborts the session rather than
+  # degrading. The daemon already READS this (discovery.ts `meta.critical` ->
+  # PluginManifest.critical); declared here so it is first-class + in-shape, not an
+  # open-world extra. Surfaced by au-workflow integrating its fail-closed gate.
+  critical?: Boolean
+  # Fail-closed-at-resume flag: the plugin cannot function without durable session
+  # continuity state (e.g. a workflow step-gate needing the prior step). Declared here so a
+  # loadable tool can assert it through the typed channel; the daemon maps
+  # `meta.requiresContinuity -> PluginManifest.requiresContinuity` in discovery (exact
+  # parallel to `critical`) and already consumes it in the Tier-1/Tier-2 continuity logic.
+  # Surfaced by au-workflow's fail-closed gate. See
+  # [[spec - session continuity requirements - a data-lost resume hides an optional capability and fails a required one closed]].
+  requiresContinuity?: Boolean
+  # NOTE: the agent-facing description moved OUT to the `tool-presentation-meta`
+  # (decision 2606251602) — runtime wiring and presentation are separate concerns.

@@ -1,0 +1,31 @@
+# mcp.hook — the BASE for KERNEL-INTERNAL capabilities (the split of decision 2608242056).
+# A hook is a SUBTYPE (`mcp.hook.au_recorder`, `mcp.hook.gate`, ...) that hooks a kernel
+# phase (mediate -> act -> observe); the agent never sees it and never invokes it. Its
+# runtime data (entry, shapes, deps, priority, critical) rides a typed `plugin-runtime-meta`
+# sub-region, read off the def via the engine (type owner -> meta.entry), exactly like
+# `mcp.tool`.
+#
+# THE SPLIT: `mcp.tool` is the agent-facing CALLABLE (fields = call input, requires a
+# `tool-presentation-meta`); `mcp.hook` is the kernel-internal capability (NO fields, NO
+# presentation). A hook is MULTI-SHAPE via `plugin-runtime-meta.shapes`, a subset of
+# `[observer, mediator, stamper]` (mediator+stamper genuinely co-occur). `callable` is no
+# longer a shape — it IS `mcp.tool`. This UNDOES the 2606-11 collapse that folded hooks into
+# `mcp.tool` as empty-`fields:` subtypes and tripped `subtype-missing-required-meta`.
+# See [[decision - 2608242056 - split mcp.tool into mcp.tool and mcp.hook]].
+#
+# CARRIES `plugin-runtime-meta` (entry/shapes/deps/priority/critical/requiresContinuity),
+# and `tool-access-meta` IF it brokers (a mediator gets a read-only broker; a stamper that
+# types a file may need read). It carries NO `tool-presentation-meta`: a hook has no
+# agent-facing surface, so — unlike `mcp.tool` — it declares NO `required:` meta obligation.
+# That is the whole point of the split: an observer / mediator / stamper no longer fires
+# `subtype-missing-required-meta` for a description it should never have had.
+#
+# DISCOVERY: au-mcp reads `mcp.tool` and `mcp.hook` together (or `subtypes('mcp')` and
+# dispatches by base), keying the registry off tool-vs-hook rather than a `callable` shape
+# flag.
+#
+# ABSTRACT: `mcp.hook` is the BASE, never claimed directly — a hook is always a subtype
+# (`mcp.hook.<name>`). Non-claimable (schema 18).
+abstract: true
+extends: mcp
+fields: {}

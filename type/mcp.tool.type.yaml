@@ -1,0 +1,39 @@
+# mcp.tool — the BASE for agent-facing tools (decision 2606191044, model B). A tool is
+# a SUBTYPE (`mcp.tool.read_file`, `mcp.tool.bash`, ...) whose FIELDS ARE its call-input
+# shape; runtime/orchestration data (entry, contractVersion, shapes, deps, priority,
+# description) rides a typed `meta:` sub-region (a `plugin-runtime-meta` def), NOT
+# instance fields; code resolves via the type OWNER (`meta.entry`).
+#
+# DISCOVERY enumerates subtypes: the engine's `subtypes('mcp.tool')` read returns every
+# subtype across the workspace with its owner repo + runtime meta in ONE read, deduped
+# to the owner copy. au-host proved this exact pattern (its `projection` base); we lift
+# it. See [[observation - 2606231225 - au-host proved the meta-plus-owner mechanic and the engine ships a subtypes read::au-harness]].
+#
+# OWNERSHIP: this BASE + `plugin-runtime-meta` are owned here (au-mcp-sdk, the contract
+# owner); the per-tool subtypes are owned by au-mcp (first-party) or a user repo (user-
+# authored) — the same shape, different source. The old flat `mcp.tool` (a manifest
+# record with `inputType`/`entry` fields + a separate `toolInput.<tool>` hierarchy) is
+# RETIRED by this reshape; `toolInput` dissolves (its leaves became `mcp.tool.<tool>`).
+#
+# CALLABLE-ONLY: `mcp.tool` is the agent-facing CALLABLE and nothing else — a tool declares
+# NO `shapes` (`callable` is no longer a shape, it IS `mcp.tool`). The kernel-internal
+# observer / mediator / stamper shapes live under the SIBLING `mcp.hook` base
+# ([[decision - 2608242056 - split mcp.tool into mcp.tool and mcp.hook]]), which re-splits
+# the 2606-11 collapse: a hook is NOT an empty-`fields:` `mcp.tool` subtype — it extends
+# `mcp.hook` and carries no presentation.
+#
+# ABSTRACT: `mcp.tool` is the BASE, never claimed directly — a tool is always a subtype
+# (`mcp.tool.<name>`). Non-claimable (schema 18). This also EXEMPTS `mcp.tool` itself from
+# its own `required: tool-presentation-meta` obligation (below): the required-meta rule is on
+# non-abstract subtypes only, so the base is not on the hook for a description of its own.
+abstract: true
+extends: mcp
+fields: {}
+# REQUIRED META (schema 18): every non-abstract `mcp.tool` subtype MUST carry a
+# `tool-presentation-meta` (its agent-facing description). The engine now enforces this
+# nominally — a concrete tool without one fires `subtype-missing-required-meta` and surfaces
+# via the type view's `unmet_required_meta`. This RETIRES the harness STANDIN in
+# au-mcp/src/daemon/discovery.ts that hand-checked "every tool has a description".
+# See [[decision - 2606251602 - tool description rides a typed tool-presentation meta surfaced via the manifest, adapter forwards::au-harness]].
+meta:
+  - required: tool-presentation-meta

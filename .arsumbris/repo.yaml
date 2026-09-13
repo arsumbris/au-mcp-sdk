@@ -1,0 +1,9 @@
+# Schema-12 repo identity + deps (au.engine.repo). Transformed from the former
+# repo-registry.yaml (self -> name/description, peers -> deps) for the schema-12
+# cross-repo resolution redesign.
+type: au.engine.repo::au-engine
+name: au-mcp-sdk
+description: the agent-facing contract + vocabulary owner — the mcp.* base types
+  (incl. the mcp.tool base + plugin-runtime-meta) and the span-index vocabulary.
+  The session-event vocabulary is TypeScript-only, since the ledger is an
+  unparsed asset whose lines claim no type

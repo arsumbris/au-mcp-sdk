@@ -1,0 +1,22 @@
+# read-precondition-meta — "the agent must have READ these file(s) before this tool runs".
+# A `tool-precondition-meta` SUBTYPE, claimed in an `mcp.tool` subtype's `meta:` block. The
+# generic tool-precondition mediator reads `onFiles` off the tool-def, checks THIS session's
+# read-view (the same read-before-write floor mechanism — a path enters the view when the
+# session reads it through the gate, OR when a tool SERVES it via the `readsFiles` result
+# contract), and denies-with-a-pointer until every `onFiles` entry has been read/served.
+#
+# `onFiles` is `file*[+]` — a non-empty list of whole-file references (wikilinks the engine
+# resolves + validates: a dangling target fires `reference-target-missing` at load, so a
+# broken precondition is a diagnostic, not a silent no-op). Proven live: reference-shaped
+# fields RESOLVE + VALIDATE inside a `meta:` block.
+#
+# This is the `file*[+]` form. The clean GENERIC shape (`onFiles<T>: T*[+]` bound per
+# use-site as `read-precondition-meta<guide>`) needs parametric type-defs the engine lacks;
+# filed as [[message - 260702174039 - parametric generic type-defs, a type parameter bound
+# per use-site::au-engine]]. A future `ofType?: type*` lens ("read a file OF this type") is a
+# natural growth field — omitted here, no consumer yet.
+#
+# Owned here (au-mcp-sdk, the contract owner). Meta is excluded from the canonical hash.
+extends: tool-precondition-meta
+fields:
+  onFiles: "file*[+]"

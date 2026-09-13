@@ -1,0 +1,16 @@
+# adapter-presentation-meta — the typed meta an `mcp.adapter` subtype carries for the HUMAN
+# picker surface: what a launcher (au-host) shows when a person chooses which adapter to launch
+# in its runtime-settings pane. The adapter analogue of `tool-presentation-meta`, but the reader
+# is a human choosing an adapter, not an agent choosing a tool. Owned here (au-mcp-sdk).
+#
+# `description` is required (a person picking between adapters needs to know what each is);
+# `label` is optional polish (a launcher falls back to the adapter's type name as the title).
+#
+# Mixes in the schema-18 nominal-meta marker so it is meta-legal (closure includes
+# `au.engine.meta::au-engine`).
+extends: au.engine.meta::au-engine
+fields:
+  # What this adapter is — shown to a human picking an adapter.
+  description: String
+  # Optional display title; absent, a launcher titles the adapter by its type name.
+  label?: String

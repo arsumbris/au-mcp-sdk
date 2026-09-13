@@ -1,0 +1,30 @@
+# required-scope-meta — the typed meta a tool / hook / skill carries to DECLARE the capabilities
+# it needs AVAILABLE in the session ([[spec - requiredScope - the sdk-side availability contract over
+# a resolved session scope]], decision 2609071712).
+#
+# Claimed in an `mcp.tool` / `mcp.hook` / `mcp.skill` subtype's `meta:` block (never instance fields —
+# meta is type-level, read off the def via the engine). A shared meta any of the three agent-facing
+# bases may wear, a sibling of `tool-access-meta` (which declares ENGINE access; this declares
+# CAPABILITY availability). Its own concern on its own change-clock.
+#
+# The AVAILABILITY sibling of au-workflow's `mcp.gate`: gate checks a PRODUCTION (you made X) per
+# action; this checks an AVAILABILITY (X is mounted / usable) per session-open. A first-party
+# session-start hook (au-mcp-core `requiredScope-check`) reads it against the kernel-resolved
+# `SessionScope` and injects a warning per unmet ref, so an unmet need surfaces EARLY at open rather
+# than failing late and cryptically at call time.
+#
+# AVAILABILITY only, never instance-cardinality: "is capability Y mounted" is the subject, a boolean
+# per ref. "Do N instances of type T exist" is a different mechanism, served by
+# `instance-count-notice`. Do not overload this with counts.
+#
+# Owned here (au-mcp-sdk, the contract owner). Meta is excluded from the canonical hash, so a
+# vendored copy drops the doc; discovery reads the OWNER copy. Mixes in the schema-18 nominal-meta
+# marker so it is meta-legal (closure includes `au.engine.meta::au-engine`).
+extends: au.engine.meta::au-engine
+fields:
+  #: the capabilities that must be AVAILABLE in the session, as type-def refs. A tool IS a typed def,
+  #: so one ref shape covers "tool `au_declare` available" and "type `T` resolvable" uniformly;
+  #: requiring a type/tool a member owns also covers "that member mounted" (an unmounted member's ref
+  #: does not resolve). Each value is a def-ref wikilink, e.g. `[[au_declare::au-provenance]]`. Absent
+  #: means no requirement.
+  requires?: type*[]

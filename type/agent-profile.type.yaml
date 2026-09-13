@@ -1,0 +1,66 @@
+# agent-profile — a named, git-tracked bundle of the capability surface an agent launches
+# with: which adapter to launch, which skills inject, which always-on context injects, which
+# tools the session may see, and the session governance. Instances are listed via `instances_of`
+# and quick-loaded at launch; the ad-hoc launch picker is an unsaved instance.
+#
+# Profiles REFERENCE capabilities, never inline them (`*` / `type<>*`, not `&`): the bundle
+# is a selection over the discovered set, not a copy of it. It resolves to the launcher's
+# inputs (env + the materialized plugin dirs) via `buildLaunchEnv` + `materialize`.
+#
+# Both capability list fields are OPEN: the field's PRESENCE is the restriction. Absent means
+# the profile says nothing about that axis, so the session gets the hard default. Present
+# means the list is exhaustive; an empty list means none. See
+# [[decision - 2607222329 - an agent-profile is OPEN over tools, the tools field's presence is the restriction::au-host]].
+#
+# OWNERSHIP: owned HERE (au-mcp-sdk, the agent contract SDK) — the agent-session vocabulary
+# is the agent layer's, beside the launcher + env contract. A harness launcher (au-host)
+# CREATES / EDITS instances (its UI) and SPAWNS the launcher; it does not own the type.
+# See [[decision - 2608221130 - the agent launch surface is a two-layer model owned by the au-mcp family, au-mcp.yaml dropped::au-harness]]
+# and [[spec - agent launch surface - one owned env contract, hard defaults over profiles, a launcher split like gen::au-harness]].
+#: A named bundle of the capability surface an agent launches with — injected skills, always-on
+#: context, visible tools, and session governance. Quick-loaded at launch; the ad-hoc picker is
+#: an unsaved instance.
+fields:
+  #: The skills to inject, as references to mcp.skill instances. Each resolves to its owner's
+  #: plugin dir at launch (gen-skills --skills). Absent = every discovered skill; an empty
+  #: list = none.
+  skills?: mcp.skill*[]
+  #: The always-on context to inject, as references to mcp.inject instances. Each resolves to
+  #: its owner's plugin dir at launch (gen-inject --inject). An inject's markdown body lands in
+  #: context unconditionally at session start — the third agent-facing delivery class beside
+  #: skills and tools, and the only PREPAID one (its full body costs every session before the
+  #: first turn). The OPEN model DIVERGES here: absent does NOT mean "all". Absent = the
+  #: role-scoped DEFAULT SET (entry/edit injects fire, dep/discover are opt-in); an empty list
+  #: = none; a subset = exactly those. A consumed dependency offers context, it never imposes it.
+  inject?: mcp.inject*[]
+  #: The tools the session may see, as def-refs to mcp.tool subtypes. The daemon resolves this
+  #: allowlist from the profile graph (there is no AU_MCP_TOOLS launch env). Absent = every
+  #: discovered tool; an empty list = no tools; a subset = exactly those. Visibility is the whole
+  #: axis — a tool's engine access is its own declaration on its def, with no human knob over it.
+  tools?: type<mcp.tool>*[]
+  #: The native tools this session may use, as a whitelist (the native-tool counterpart to `tools`).
+  #: Resolved DAEMON-SIDE from this profile at session-open, like `tools` (no AU_MCP_NATIVE_TOOLS env).
+  #: Tri-state: absent = every native tool
+  #: (the hard default); an empty list = NO native tool; a list = ONLY those. A whitelist with no
+  #: exceptions — nothing is implicitly allowed; the agent is pointed at the au_* gate tools for the
+  #: rest. String names (adapter-declared native tools like `Bash`/`WebFetch`), not engine type-defs.
+  nativeToolAllowlist?: String[]
+  #: The hooks this session runs, as def-refs to mcp.hook subtypes — the off-switch. Governs the
+  #: NON-critical hooks: tri-state like `tools` (absent = every hook; an empty list = only the critical
+  #: ones; a subset = those + the critical ones). A `critical` hook is MANDATORY — it always runs and
+  #: cannot be excluded; listing one here is redundant and the validator complains. Config
+  #: (`hookConfig`) is a SEPARATE axis — configuring a hook here does not restrict the others.
+  hooks?: type<mcp.hook>*[]
+  #: Typed CONFIG for hooks that take it, as inline-or-ref mcp.hook INSTANCES — each instance's FIELDS
+  #: are the config (fields-are-config, decision 2606191044 applied to hooks). A hook runs once per
+  #: configured instance with its typed fields. Inline is fine (config is AUTHORED data, not a selection
+  #: of pre-existing capabilities, so it diverges from the skills/inject/tools ref-only rule); a ref
+  #: shares one config across profiles. Independent of `hooks`: this configures, it does not select.
+  hookConfig?: mcp.hook&[+]
+  #: The adapter to launch with, as a def-ref to an mcp.adapter subtype (e.g. mcp.adapter.cc). Unlike the
+  #: other axes, this is resolved LAUNCHER-SIDE, PRE-launch: the adapter is what SPAWNS the session, so a
+  #: harness launcher (au-host) reads it off the profile to pick which adapter to run — it is not resolved
+  #: daemon-side at session-open like `tools`/`hooks`. The launcher locates the adapter's dir from the
+  #: def's `source.file` and its entries from `adapter-runtime-meta`. Absent = the launcher's default
+  #: adapter (hard defaults over profiles). See [[spec - mcp.adapter type - the harness adapter as a discovered typed node]].
+  adapter?: type<mcp.adapter>*

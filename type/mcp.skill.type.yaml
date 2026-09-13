@@ -1,0 +1,20 @@
+#: mcp.skill — a package ships AGENT GUIDANCE as a typed INSTANCE (skills share ONE shape, so they
+#: are instances of this single type, NOT subtypes like mcp.tool). Each instance is a launch-time
+#: materialized skill: `name` + `description` drive the harness skill (a Claude Code plugin skill),
+#: and the instance's markdown BODY is the skill instructions. Discovered via `instances_of('mcp.skill')`
+#: — the launch-time-STATIC mirror of the runtime-DYNAMIC `mcp.tool`. No `body:` contract (the body is
+#: freeform prose) and no `entry`/code: a skill is guidance, not a callable.
+#: See [[spec - mcp.skill - packages ship agent guidance as typed instances materialized at launch into each harness skill folder::au-harness]]
+#: and [[c - skills are launch-time-static the mirror of runtime-dynamic tools::au-harness]].
+extends: mcp
+fields:
+  #: the skill's name; becomes the harness skill id (e.g. Claude Code `/<owner>:<name>`).
+  name: String
+  #: what the skill is for + when to use it; the harness surfaces this so the agent auto-invokes the skill.
+  description: String
+  #: DISCOVERY axis (optional) — the `mcp.tool` leaves this skill is ABOUT, as def-refs, so a reader/host
+  #: can relate a skill to its tools. NOT materialized into the harness skill.
+  related-tools?: type<mcp.tool>*[]
+  #: PERMISSIONS axis (optional) — the `mcp.tool` leaves the skill may use, as def-refs; the adapter maps
+  #: these to the harness's allowed-tools names. Absent means no restriction key is emitted.
+  allowed-tools?: type<mcp.tool>*[]

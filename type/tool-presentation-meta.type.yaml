@@ -1,0 +1,35 @@
+# tool-presentation-meta — the typed meta a tool carries for its AGENT-FACING surface
+# ([[decision - 2606251602 - tool description rides a typed tool-presentation meta surfaced via the manifest, adapter forwards::au-harness]]).
+# Claimed in an `mcp.tool` subtype's `meta:` block (never instance fields — meta is
+# type-level, read off the def via the engine). SEPARATE from plugin-runtime-meta:
+# runtime wiring (entry/shapes) and presentation are different concerns on different
+# change-clocks. The daemon reads these fields and puts them on the tool's PluginManifest;
+# au-mcp surfaces them via list-capabilities; the adapter forwards them, holding no tool
+# descriptions or usage notes of its own ("adapters only adapt").
+#
+# Owned here (au-mcp-sdk, the contract owner). Meta is excluded from the canonical hash,
+# so a vendored copy drops the doc; discovery reads the OWNER copy (engine `subtypes`
+# dedupes to it).
+#
+# Mixes in the schema-18 nominal-meta marker so it is meta-legal (its closure includes
+# `au.engine.meta::au-engine`, the universal `::au-engine` peer — no `deps` needed).
+extends: au.engine.meta::au-engine
+fields:
+  # Human-readable description, advertised to the agent. Required: every tool presents one
+  # (the engine enforces the SHAPE here; "every tool DECLARES this meta" is enforced
+  # harness-side for now — STANDIN, see decision 2606251602).
+  #
+  # WHAT the tool is and HOW to call it. Answers the question an agent has once it is already
+  # looking at this tool.
+  description: String
+  # OPTIONAL proactive trigger: WHEN to reach for this tool unprompted, and what to do first.
+  # Answers the question an agent does NOT know it should be asking, so it belongs in the
+  # session's up-front orientation rather than only on the tool itself.
+  #
+  # Distinct from `description` on purpose. A description is read when the agent has already
+  # found the tool; guidance is what makes it find the tool at all. Carry one only when a tool
+  # has a real trigger — most tools do not, and an empty exhortation is noise.
+  #
+  # It rides the manifest beside the description, so a session's orientation names guidance
+  # only for the tools that session actually has. No downstream layer keys notes by tool name.
+  guidance?: String

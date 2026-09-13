@@ -1,0 +1,11 @@
+# retention-config — au-mcp's session-RETENTION policy, stored over the engine's scoped-config
+# channel (repo scope, consumer `au-mcp`), NOT a host-owned or hand-parsed file. The daemon reads
+# it at startup for the age-sweep and exposes it through the `retention-config` /
+# `set-retention-window` verbs; a consuming app is a pure client that never names the storage.
+# See [[spec - session retention - dormant sessions are surfaced, age-bounded, and retired by a
+# kernel-store GC the recorder follows::au-harness]].
+#: au-mcp's session-retention policy (the dormancy window).
+fields:
+  #: How many days a cleanly-closed (dormant) session's durable store is kept before the age-sweep
+  #: retires it. A positive integer; absent falls to the 30-day hard default.
+  dormancy_days?: "Number{>=1 & integer}"

@@ -1,0 +1,26 @@
+# adapter-runtime-meta — the typed meta an `mcp.adapter` subtype carries to declare the
+# explicit code ENTRY POINTS a launcher invokes. Claimed in a subtype's `meta:` block, NEVER
+# as instance fields — meta is type-level and read off the type-def via the engine (the
+# `subtypes` read carries it). Owned here (au-mcp-sdk, the contract owner).
+#
+# Each entry is relative to the OWNING PACKAGE ROOT (where the type-def lives), which a launcher
+# resolves from the def's `source.file`. The entries are EXPLICIT — one per operation, the way
+# every other loadable node declares its entry (`plugin-runtime-meta.entry`) — not a package dir
+# plus a hardcoded `/bin/<name>` convention, so a community adapter names its own.
+#
+# Mixes in the schema-18 nominal-meta marker so it is meta-legal (closure includes
+# `au.engine.meta::au-engine`).
+extends: au.engine.meta::au-engine
+fields:
+  # Exact-equality contract handshake (no semver), mirrors the plugin-runtime-meta convention.
+  contractVersion: Number{>=0 & integer}
+  # The executable NAME the adapter launches (e.g. "claude" / "codex"), NOT a path. A launcher
+  # resolves it to a path (`which <name>`) and may override from its own per-machine config.
+  # Required: every adapter launches something.
+  agentBinary: String
+  # Emits the runnable spawn command for this harness ({env, pluginDirs} -> command).
+  launchEntry: String
+  # The skills materializer for this harness.
+  skillsEntry: String
+  # The inject materializer for this harness.
+  injectEntry: String

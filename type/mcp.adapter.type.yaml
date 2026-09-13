@@ -1,0 +1,32 @@
+# mcp.adapter — the BASE for a harness adapter's DISCOVERY node. A concrete adapter is a
+# SUBTYPE (`mcp.adapter.cc`, `mcp.adapter.codex`, ...) self-declared in the adapter's OWN
+# repo. It is the typed, discovery-side companion to the runtime `Adapter`/`AdapterInfo`
+# interface (src/adapter.ts): the interface is what a LIVE adapter reports per session; this
+# node is what EXISTS, WHERE, and HOW to launch it. The two coexist and share one join key.
+#
+# IDENTITY is the type NAME itself, nothing else. The `subtypes` read returns `def.name`, so a
+# launcher matches a discovered adapter to a live one by `AdapterInfo.harness === def.name`.
+# There is NO `harness`/identity FIELD: a def has no instances (discovery enumerates SUBTYPES,
+# like `mcp.tool`), so a field would have no value carrier — and the engine has no tiered-name
+# concept, so the name is opaque (an adapter may be named `my-adapter`, not just `mcp.adapter.*`).
+#
+# DISCOVERY: a launcher (au-host) reads `subtypes('mcp.adapter')` straight off the ENGINE — the
+# kernel (au-mcp) never loads an adapter, an adapter has no plugin shape. Location resolves from
+# the def's `source.file` (`packageRootOf`), like every other discovered node; the per-operation
+# entries ride `adapter-runtime-meta`.
+#
+# ABSTRACT: `mcp.adapter` is the BASE, never claimed directly — an adapter is always a subtype.
+# This also EXEMPTS the base from its own required-meta obligation (below): the rule is on
+# non-abstract subtypes only.
+abstract: true
+extends: mcp
+fields: {}
+# REQUIRED META: every concrete adapter MUST carry BOTH — `adapter-runtime-meta` (the code
+# entries a launcher invokes) and `adapter-presentation-meta` (the human picker surface). A
+# concrete adapter missing either fires `subtype-missing-required-meta` and surfaces via the
+# type view's `unmet_required_meta`, so a launcher GATES on it and skips a non-launchable /
+# unpresentable adapter rather than spawning a broken one. Mirrors `mcp.tool`'s required
+# `tool-presentation-meta`. Owned here (au-mcp-sdk, the contract owner).
+meta:
+  - required: adapter-runtime-meta
+  - required: adapter-presentation-meta

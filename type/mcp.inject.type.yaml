@@ -1,0 +1,48 @@
+#: mcp.inject — a package or workspace ships ALWAYS-ON agent context as a typed INSTANCE (injects share
+#: ONE shape, so they are instances of this single type, NOT subtypes like mcp.tool). Each instance's
+#: markdown BODY is the content, and the instance file is the SEED: its own outbound wikilinks are the
+#: hop frontier a `depth` walk follows. Discovered via `instances_of('mcp.inject')`, packed into
+#: generated session-start slots under a hard character budget.
+#: The ALWAYS-ON delivery class: a tool applies when the agent CALLS it, a skill when its description
+#: MATCHES, an inject unconditionally. So an inject is PREPAID — its full body costs on every session,
+#: before the user has said anything — which is why budget is a concern of this type and not only of
+#: its implementation. The authoring rule that follows: conditional guidance is an mcp.skill,
+#: unconditional context is an mcp.inject.
+#: There is deliberately NO `always` field (the DEFAULT SET is derived from the owning member's ROLE —
+#: entry/edit are in it, dep/discover are opt-in, so a consumed member offers and never imposes), NO
+#: `entry`/code (an inject is prose, not a callable), and NO target field (the instance IS the seed).
+#: See [[spec - mcp.inject - typed instances whose bodies land in context at session start, hop-expanded and packed across generated hook slots::au-harness]]
+#: and [[c - the three agent-facing delivery classes differ by what makes them apply::au-harness]].
+extends: mcp
+fields:
+  #: the inject's name; the stable slug, and with the owning repo it forms the selection key
+  #: (`<owner>:<name>`) a host picker toggles and a launch filter matches.
+  name: String
+  #: what this context IS, for the HUMAN picker deciding whether to pay for it.
+  #: NOT a trigger. Unlike `mcp.skill.description`, nothing ever matches on this — an inject always
+  #: applies, so there is no selection for a description to drive. It is a cost-justification label.
+  description: String
+  #: how many REFERENCE HOPS out from this instance to follow, seeding at the instance's own path.
+  #: Absent or 0 injects the body alone. Each reached node is injected under its own provenance header.
+  #: Optional because the common case is a self-contained body.
+  depth?: Number{>=0 & integer}
+  #: which REFERENCE EDGE KINDS the hop walk follows, as a CLOSED SET over the engine's
+  #: `references_out` edge classification. An ENUM rather than String[] deliberately: a typo'd kind
+  #: in a free-string list is accepted and then follows nothing, so the inject silently injects less
+  #: than it claims. As an enum it is a `field-shape-mismatch` at authoring time. The cost is that a
+  #: sixth engine kind makes this stale and refuses a legal value — stale-and-loud, over
+  #: wrong-and-silent.
+  #: `unknown` is deliberately EXCLUDED: it is the engine's escape hatch for an edge it could not
+  #: classify, never something an author elects to follow.
+  #: REQUIRED past depth 1: an unfiltered depth-2 walk through a hub or MOC consumes the entire
+  #: session budget before the user's first turn, so the blast radius must be stated rather than
+  #: defaulted. Ignored when `depth` is absent or 0.
+  edge-kinds?: "[field-reference, field-string-wikilink, contributing, navigational][]"
+  #: what to SHOW per node in the injected block. Default `body` (prose only) — the clean form,
+  #: since frontmatter is usually routing noise. `body-and-frontmatter` opts into the WHOLE FILE,
+  #: every frontmatter field included. Use it when the frontmatter carries real content (a typed
+  #: instance whose fields ARE the data), or to make a frontmatter-edge fanout legible (the link
+  #: that pulled a node in lives in the source node's frontmatter, which `body` alone would hide).
+  #: `body` maps to the engine's `body` read, `body-and-frontmatter` to `content` (whole file) —
+  #: the latter works on plain notes too, unlike the structured `instance` view.
+  show?: [body, body-and-frontmatter]

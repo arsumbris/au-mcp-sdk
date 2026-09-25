@@ -16,7 +16,7 @@
 // `AU_MCP_TRACE` is deliberately ABSENT: trace/capture is being retired as a launch knob
 // (persistence is the recorder's own concern, not a kernel env). See the same decision +
 // [[plan - 2608221145 - build the agent launch contract, two-layer model with one env
-// contract and a launcher bin::au-harness]] Phase 6.
+// contract and a launcher bin::au-harness]].
 
 import { randomUUID } from 'node:crypto'
 

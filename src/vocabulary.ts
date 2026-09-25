@@ -463,7 +463,7 @@ export interface SessionEndData {
 
 /**
  * Build a `SessionEvent` envelope for one event. `run` and `seq` are left 0: the daemon
- * stamps the authoritative monotonic run + seq on append (P5). Producers (the adapter,
+ * stamps the authoritative monotonic run + seq on append. Producers (the adapter,
  * the daemon on a deny) use this to construct events.
  * `kind` is any kind string: the generic `EventKind` values, or an adapter's
  * extended kind (e.g. CC's `tool_unavailable`) — adapters extend the vocabulary.

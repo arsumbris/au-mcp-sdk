@@ -20,7 +20,7 @@ fields:
   entry: String
   # Exact-equality contract handshake (no semver), mirrors PluginManifest.contractVersion.
   contractVersion: Number{>=0 & integer}
-  # HOOK shapes: which kernel phases a `mcp.hook` fills (P2), a subset of
+  # HOOK shapes: which kernel phases a `mcp.hook` fills, a subset of
   # `[observer, mediator, stamper, session-start]` (mediator+stamper genuinely co-occur; a
   # session-start hook that also blocks tools co-declares `mediator`). OPTIONAL and
   # HOOK-ONLY (split decision 2608242056): a `mcp.tool` is the agent-facing CALLABLE and
@@ -33,7 +33,7 @@ fields:
   # Quoted so YAML hands the shape over as a scalar string (a bare `[...]` parses as a
   # YAML flow sequence and the trailing `[+]` then fails); the engine grammar parses it.
   shapes?: "[observer, mediator, stamper, session-start][+]"
-  # Other plugins this one needs (P4); the daemon auto-loads them. PluginManifest.dependsOn.
+  # Other plugins this one needs; the daemon auto-loads them. PluginManifest.dependsOn.
   deps?: String[]
   # Ordering TIER within a phase (`gate | floor | policy`, earlier runs first), replacing the
   # old integer `priority` (decision 2609020302 — role-named buckets, no magic numbers). The

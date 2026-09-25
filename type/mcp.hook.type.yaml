@@ -8,7 +8,8 @@
 # THE SPLIT: `mcp.tool` is the agent-facing CALLABLE (fields = call input, requires a
 # `tool-presentation-meta`); `mcp.hook` is the kernel-internal capability (NO fields, NO
 # presentation). A hook is MULTI-SHAPE via `plugin-runtime-meta.shapes`, a subset of
-# `[observer, mediator, stamper]` (mediator+stamper genuinely co-occur). `callable` is no
+# `[observer, mediator, stamper, session-start]` (mediator+stamper genuinely co-occur; a
+# session-start hook may also block, co-declaring mediator; decision 2609020302). `callable` is no
 # longer a shape — it IS `mcp.tool`. This UNDOES the 2606-11 collapse that folded hooks into
 # `mcp.tool` as empty-`fields:` subtypes and tripped `subtype-missing-required-meta`.
 # See [[decision - 2608242056 - split mcp.tool into mcp.tool and mcp.hook]].

@@ -70,7 +70,7 @@ export interface AdapterInfo {
   /** The harness's native tool surface (part 1). */
   nativeTools: NativeTool[]
   /**
-   * The prefix this harness gives the au-mcp gate tools (Phase 6.3). A governance
+   * The prefix this harness gives the au-mcp gate tools. A governance
    * mode states `allow_gate` as POLICY; the concrete prefix is harness-specific, so
    * the adapter declares it (CC: `mcp__plugin_au-mcp-adapter-cc_au__`). Absent -> a
    * governance mode that allows the gate has no prefix to allow (deny-all).

@@ -4,7 +4,7 @@
 // async methods. The CC shim, the CC hooks, au-host, etc. all build on this.
 // Mirrors au-host-sdk's createMountHost (a library that re-presents a transport).
 
-import type { AdapterInfo, NativeTool } from './adapter.ts'
+import type { AdapterInfo } from './adapter.ts'
 import type { PendingAction, Decision, SessionEvent, ToolManifest } from './plugin.ts'
 import type { TraceQuery, TraceSlice } from './trace.ts'
 import type { ClientRequest, DaemonResponse, DaemonTransport, RequestId, ReplayEvent, DormantSession } from './wire.ts'
@@ -17,8 +17,7 @@ export interface DaemonClient {
   /** Record an event; resolves with any mediator `review` text (the post-tool channel), or undefined. */
   observe(session: string, event: SessionEvent): Promise<string | undefined>
   /** Workspace-scoped: `session` is optional (the callable tools don't need it).
-   *  `allowed` is the caller's tool allowlist; the daemon refuses a tool outside it.
-   *  Omit it to reach every tool (the tool-visibility spec's absent-means-all rule). */
+   *  Tool visibility is profile-derived daemon-side; the caller passes no allowlist here. */
   invoke(
     session: string | undefined,
     tool: string,
@@ -43,7 +42,7 @@ export interface DaemonClient {
   listCapabilities(
     session?: string,
     profile?: string,
-  ): Promise<{ callables: ToolManifest[]; redirects: NativeTool[] }>
+  ): Promise<{ callables: ToolManifest[] }>
   /** Liveness + version probe; needs no session. */
   ping(): Promise<{ contractVersion: number; workspace: string }>
   /** Ask the daemon to stop (operator/lifecycle control). */
@@ -223,7 +222,7 @@ export function createDaemonClient(transport: DaemonTransport, options: DaemonCl
     async listCapabilities(session, profile) {
       const r = await request((id) => ({ kind: 'list-capabilities', id, session, profile }))
       if (r.kind !== 'capabilities') throw unexpected(r)
-      return { callables: r.callables, redirects: r.redirects }
+      return { callables: r.callables }
     },
     async sessionGuards(session) {
       const r = await request((id) => ({ kind: 'session-guards', id, session }))

@@ -4,7 +4,7 @@
 // au-host, other UIs. The daemon holds the state; clients send requests and
 // await correlated responses over a Transport.
 
-import type { AdapterInfo, NativeTool } from './adapter.ts'
+import type { AdapterInfo } from './adapter.ts'
 import type { PendingAction, Decision, SessionEvent, ToolManifest } from './plugin.ts'
 import type { TraceQuery, TraceSlice } from './trace.ts'
 
@@ -25,8 +25,7 @@ export type ClientRequest =
   /** Record an event (observers run inside the daemon). */
   | { kind: 'observe'; id: RequestId; session: string; event: SessionEvent }
   /** Invoke a callable tool the daemon surfaces. Workspace-scoped (session optional).
-   *  `allowed` is the caller's tool allowlist: the daemon refuses a tool outside it.
-   *  Absent means every tool (see the tool-visibility spec's absent-means-all rule). */
+   *  Tool visibility is profile-derived daemon-side; the caller passes no allowlist here. */
   | { kind: 'invoke'; id: RequestId; session?: string; tool: string; input: unknown }
   /** Query the live session log. */
   | { kind: 'consult-trace'; id: RequestId; session: string; query: TraceQuery }
@@ -40,9 +39,9 @@ export type ClientRequest =
    *  present). Lets an input-layer hook (UserPromptSubmit) decide whether to block an ungoverned read path
    *  like an @-mention, without running a tool call. */
   | { kind: 'session-guards'; id: RequestId; session: string }
-  /** List the active callables + native redirects. Workspace-scoped (session optional).
-   *  `allowed` is the caller's tool allowlist: the daemon advertises exactly those tools.
-   *  Absent means every tool, an empty list means none (the tool-visibility spec). */
+  /** List the active callables. Workspace-scoped (session optional).
+   *  `profile` names the agent-profile whose `allowed-tools` filters what is advertised;
+   *  absent means every tool (the tool-visibility spec's absent-means-all rule). */
   | { kind: 'list-capabilities'; id: RequestId; session?: string; profile?: string }
   /** Liveness + version probe; needs no session. Operator/status control. */
   | { kind: 'ping'; id: RequestId }
@@ -93,7 +92,7 @@ export type DaemonResponse =
   /** The session's governance posture: `denyNative` (a native-tool allowlist is set, so
    *  unlisted native tools are forced through the gate), for an adapter to report + inject the "use the gate" note. */
   | { kind: 'guards'; id: RequestId; denyNative: boolean }
-  | { kind: 'capabilities'; id: RequestId; callables: ToolManifest[]; redirects: NativeTool[] }
+  | { kind: 'capabilities'; id: RequestId; callables: ToolManifest[] }
   | { kind: 'pong'; id: RequestId; contractVersion: number; workspace: string }
   | { kind: 'shutdown-ack'; id: RequestId }
   /** The dormant sessions (`list-dormant`), or the ones a proposed window would retire

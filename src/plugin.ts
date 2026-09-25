@@ -7,7 +7,7 @@
 //   fields), a presentation, appears in the advertised tool list, and returns a result. A
 //   tool fills exactly one role, so it declares NO `shapes`.
 // - a HOOK — a KERNEL-INTERNAL capability the agent never sees. It fills one or more phase
-//   SHAPES (P2) and may be more than one:
+//   SHAPES and may be more than one:
 //   - OBSERVER: watches events, never invoked by the agent (trace).
 //   - MEDIATOR: intercepts an action and decides allow / deny / inject.
 //   - STAMPER: augments a governed write with stamps folded into its commit.
@@ -62,8 +62,8 @@ export type PluginTier = 'gate' | 'floor' | 'policy'
 export type ToolAccess = 'none' | 'read' | 'read-write'
 
 /**
- * The fields EVERY plugin manifest carries, tool or hook. Discovered as a typed instance
- * (P6); the kernel reads this to wire the plugin into the right phases and resolve deps.
+ * The fields EVERY plugin manifest carries, tool or hook. Discovered as a typed instance;
+ * the kernel reads this to wire the plugin into the right phases and resolve deps.
  * `PluginManifest` is the discriminated union `ToolManifest | HookManifest` on `kind`.
  */
 export interface BaseManifest {
@@ -82,7 +82,7 @@ export interface BaseManifest {
   /** Integer contract version; handshake is exact-equality, no semver. */
   contractVersion: number
   /**
-   * Other plugins this one needs (P4). The daemon AUTO-LOADS them; a hard rule
+   * Other plugins this one needs. The daemon AUTO-LOADS them; a hard rule
    * whose dep cannot load fails closed. Never silent-degrade a hard governance rule.
    */
   dependsOn?: PluginId[]

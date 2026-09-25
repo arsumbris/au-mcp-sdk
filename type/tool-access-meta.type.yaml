@@ -7,8 +7,10 @@
 #
 # This is the TOOL stating its own least privilege, fixed at discovery for its lifetime in the
 # daemon. It is TRANSPARENCY + a DEFAULT SCOPE, not a security boundary. There is no human knob
-# over it: which tools a session HAS is the separate on/off allowlist axis (the `AU_TOOLS`
-# per-launch env), and that axis never changes what a tool may do once it is loaded.
+# over it: which tools a session ADVERTISES is the separate on/off axis, DERIVED from the
+# active agent-profile's `allowed-tools` (passed as `list-capabilities.profile`; absent profile
+# means all; plan 2609072337 retired the old `AU_TOOLS` per-launch env). That axis never changes
+# what a tool may do once it is loaded.
 #
 # A tool needing more than one access shape is expressed as DISTINCT tools, not as one tool with
 # a variable grant — a tool that is present but internally denied advertises work it cannot perform.
